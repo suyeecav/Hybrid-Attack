@@ -7,7 +7,7 @@ The following steps should be sufficient to install the required environments
 sudo apt-get install python3-pip  
 sudo pip3 install --upgrade pip  
 sudo pip3 install pillow scipy numpy tensorflow-gpu keras h5py numba  
-sudo pip3 install cleverhans (requires tensorflow to be installed) 
+sudo pip3 install cleverhans
 ```
 
 # Reproduce Results
