@@ -1,5 +1,5 @@
 # About
-This repository is the code corresponding to paper "Improved Estimation of Cost of Black-box Attacks", published at the 29th Usenix Security Symbosium. Arxiv version can be found at [here](http://www.cs.virginia.edu/~evans/). The code is tested on Python3. Tensorflow version is 1.7.0 and keras version is 2.2.4.
+This repository is the code corresponding to paper "Improved Estimation of Cost of Black-box Attacks", published at the 29th Usenix Security Symbosium. Arxiv version can be found at [here](http://www.cs.virginia.edu/~evans/). The code is tested on Python3. TensorFlow version is 1.7.0 and Keras version is 2.2.4.
 
 # Pre-requisites
 The following steps should be sufficient to install the required environments
@@ -10,7 +10,7 @@ The following steps should be sufficient to install the required environments
 
 > sudo pip3 install pillow scipy numpy tensorflow-gpu keras h5py numba
 
-> pip install cleverhans (after installed tensorflow)
+> sudo pip3 install cleverhans (requires tensorflow to be installed)
 
 # Reproduce Results
 To reproduce our results, please follow the steps below:
