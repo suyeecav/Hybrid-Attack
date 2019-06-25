@@ -3,13 +3,17 @@ This repository is the code corresponding to paper "Improved Estimation of Cost 
 
 # Pre-requisites
 The following steps should be sufficient to install the required environments
+
 > sudo apt-get install python3-pip
+
 > sudo pip3 install --upgrade pip
+
 > sudo pip3 install pillow scipy numpy tensorflow-gpu keras h5py numba
+
 > pip install cleverhans (after installed tensorflow)
 
 # Reproduce Results
 To reproduce our results, please follow the steps below:
 1. Download the pretrained model weight files from [here](https://www.dropbox.com/sh/gdipubr7rp0d8qv/AADPgrs4ZGfOl4ob_dXmYsFla?dl=0), if you do not want to train models on yourself. 
-2. Place these model weight files in proper location and replace the file directory accoridingly. File directories are marked with *TODO*: **For CIFAR10**, check hybrid_attack.py, cifar10_complex_models, cifar10_robust_models.py and cifar10_simple_models.py files. **For MNIST**, check hybrid_attack.py, mnist_models.py, mnist_robust_models.py.
-3. Go to specific dataset directory and run the shell file. [AutoZOOM](https://github.com/IBM/Autozoom-Attack) and [NES](https://github.com/labsix/limited-blackbox-attacks) attacks are configured to run directly of the baseline, hybrid and hybrid with local fine-tuning attacks. 
+2. Place these model weight files in proper location and replace the file directory accoridingly. File directories are marked with TODO and check the following files: **CIFAR10** (hybrid_attack.py, cifar10_complex_models, cifar10_robust_models.py, cifar10_simple_models.py). **MNIST** (check hybrid_attack.py, mnist_models.py, mnist_robust_models.py).
+3. Go to specific dataset directory and run the shell file. [AutoZOOM](https://github.com/IBM/Autozoom-Attack) and [NES](https://github.com/labsix/limited-blackbox-attacks) attacks are configured to run directly for the baseline, hybrid and hybrid with local fine-tuning attacks. 
