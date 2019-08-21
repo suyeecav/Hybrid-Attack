@@ -1,5 +1,5 @@
 # About
-This repository is the code corresponding to paper "Hybrid Batch Attacks: Finding Black-box Adversarial Examples with Limited Queries", published at the 29th Usenix Security Symbosium. Arxiv version can be found at [here](http://www.cs.virginia.edu/~evans/). The code is tested on Python3. TensorFlow version is 1.7.0 and Keras version is 2.2.4. The codes are grouped by the datasets for clarity.
+This repository is the code corresponding to paper "Hybrid Batch Attacks: Finding Black-box Adversarial Examples with Limited Queries", published at the 29th Usenix Security Symbosium. Arxiv version can be found at [here](https://github.com/suyeecav/Hybrid-Attack). The code is tested on Python3. TensorFlow version is 1.7.0 and Keras version is 2.2.4. The codes are grouped by the datasets for clarity.
 
 # Pre-requisites
 The following steps should be sufficient to install the required environments 
