@@ -393,7 +393,7 @@ class cifar10_models(object):
 		input_shape = (32,32,3)
 
 		if load_existing:
-			save_dir = '' # TODO: replace with your own directory
+			save_dir = '' # TODO: replace with your own ROOT directory for normal cifar10 models
 			if model_name == 'resnet_v1':
 				model_load_name = 'cifar10_'+'ResNet'+str(depth)+'v1_model'
 			elif model_name == 'resnet_v2':

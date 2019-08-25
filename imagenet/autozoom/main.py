@@ -140,7 +140,7 @@ def main(args):
 	np.random.seed(args["seed"])
 
 	# test whether adversarial examples exsit, if no, generate it, otherwise, load it.
-	prefix = os.path.join("Results", args["attack_seed_type"])
+	prefix = "Results"
 	prefix = os.path.join(prefix, str(args["seed"]))
 
 	if not os.path.exists(prefix): # no history info
@@ -195,21 +195,29 @@ def main(args):
 
 		# save local adversarial
 		os.makedirs(prefix)
+		# save statistics
+		fname = prefix + '/adv_img_loss.npy'
+		np.save(fname, adv_img_loss)
+		fname = prefix + '/orig_img_loss.npy'
+		np.save(fname, orig_img_loss)
+		fname = prefix + '/pgd_cnt_mat.npy'
+		np.save(fname, pgd_cnt_mat)
+
 		# save output for local attacks
-		fname = prefix + '/local_aes_{}.npy'.format(li_eps)
+		fname = prefix + '/local_aes.npy'
 		np.save(fname, local_aes)
-		fname = prefix + '/orig_images_{}.npy'.format(li_eps)
+		fname = prefix + '/orig_images.npy'
 		np.save(fname, orig_images)
-		fname = prefix + '/target_ys_{}.npy'.format(li_eps)
+		fname = prefix + '/target_ys.npy'
 		np.save(fname, target_ys)
-		fname = prefix + '/target_ys_one_hot_{}.npy'.format(li_eps)
+		fname = prefix + '/target_ys_one_hot.npy'
 		np.save(fname, target_ys_one_hot)
 	else:
 		print('loading data from files')
-		local_aes = np.load(prefix + '/local_aes_{}.npy'.format(li_eps))
-		orig_images = np.load(prefix + '/orig_images_{}.npy'.format(li_eps))
-		target_ys = np.load(prefix + '/target_ys_{}.npy'.format(li_eps))
-		target_ys_one_hot = np.load(prefix + '/target_ys_one_hot_{}.npy'.format(li_eps))
+		local_aes = np.load(prefix + '/local_aes.npy')
+		orig_images = np.load(prefix + '/orig_images.npy')
+		target_ys = np.load(prefix + '/target_ys.npy')
+		target_ys_one_hot = np.load(prefix + '/target_ys_one_hot.npy')
 	assert local_aes.shape == (nb_imgs, 224, 224, 3)
 	assert orig_images.shape == (nb_imgs, 224, 224, 3)
 	assert target_ys.shape == (nb_imgs,)
@@ -268,9 +276,9 @@ def main(args):
 			success_flags.append(1)
 		num_queries_list.append(query_num)
 	# save query number and success
-	fname = prefix + '/{}_num_queries_{}_{}_{}.txt'.format(args["attack_seed_type"], li_eps, args['bstart'], args['bend'])
+	fname = prefix + '/{}_num_queries.txt'.format(args["attack_seed_type"])
 	np.savetxt(fname,num_queries_list)
-	fname = prefix + '/{}_success_flags_{}_{}_{}.txt'.format(args["attack_seed_type"], li_eps, args['bstart'], args['bend'])
+	fname = prefix + '/{}_success_flags.txt'.format(args["attack_seed_type"])
 	np.savetxt(fname,success_flags)
 
 	print('finish autozoom attack')

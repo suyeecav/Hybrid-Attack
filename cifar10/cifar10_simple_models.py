@@ -262,7 +262,7 @@ class cifar10_models_simple(object):
 		self.keep_prob = keep_prob
 		self.test_batch_size = test_batch_size
 		if load_existing:
-			save_dir = '' # TODO: put your own directory
+			save_dir = '' # TODO: put your own ROOT directory of simple cifar10 models
 			filepath = os.path.join(save_dir, model_name+'.h5')
 			model = load_model(filepath)
 			self.model = model
@@ -339,7 +339,7 @@ def main(path_dir,trainable,type,epochs):
 	X_train, Y_train, X_test, Y_test = data.train_data, data.train_labels, data.test_data, data.test_labels
 	model_names = ['modelA','modelB','modelC','modelD','modelE']
 	model, logits_tensor = model_cifar10(input_ph = x, type = type)
-	path_dir = '' # TODO: put your own directory
+	path_dir = '' # put your file path for simple cifar10 models. THIS IS ONLY NEEDED WHEN TRAINING YOUR MODEL FROM SCRATCH
 	# initiate RMSprop optimizer
 	# opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
 	opt = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)

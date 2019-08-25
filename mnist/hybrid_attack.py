@@ -77,15 +77,15 @@ def main(args):
 	else:
 		if args["robust_type"] == "madry":
 			target_model_name = 'madry_robust'
-			model_dir = "" # TODO: your madry robust model directory
+			model_dir = "" # TODO: your madry robust target model directory
 			target_model = MadryModel(sess,model_dir = model_dir,bias = 0.5)
 		elif args["robust_type"] == "zico":
 			target_model_name = 'zico_robust'
-			model_dir = ""  # TODO: your madry robust model directory
+			model_dir = ""  # TODO: your zico robust target model directory
 			target_model = ZicoModel(model_dir = model_dir,bias = 0.5)
 		elif args["robust_type"] == "percy":
 			target_model_name = 'percy_robust'
-			model_dir = "" # TODO: your madry robust model directory
+			model_dir = "" # TODO: your percy's robust target model directory
 			target_model = PercyModel(sess,model_dir = model_dir,bias = 0.5)
 		else:
 			raise NotImplementedError
@@ -98,7 +98,7 @@ def main(args):
 		# codec = CODEC(image_size, num_channels, args["compress_mode"], use_tanh=False)
 		codec = 0
 		args["img_resize"] = 14
-		codec_dir = '' # TODO: put your autoencoder file directory
+		codec_dir = '' # TODO: put your mnist autoencoder weight file directory
 		encoder = load_model(codec_dir + 'whole_mnist_encoder.h5')
 		decoder = load_model(codec_dir + 'whole_mnist_decoder.h5')
 
@@ -138,11 +138,11 @@ def main(args):
 
 	if with_local:
 		if load_existing:
-			loc_adv = 'with_tune'
+			loc_adv = 'adv_with_tune'
 		if args["no_tune_local"]:
-			loc_adv = 'no_tune'
+			loc_adv = 'adv_no_tune'
 	else:
-		loc_adv = 'norm'
+		loc_adv = 'orig'
 	
 	# target type
 	if args["attack_type"] == "targeted":
@@ -158,15 +158,15 @@ def main(args):
 
 	fine_tune_freq = args["fine_tune_freq"] # fine-tune the model every K images to save total model training time
 	
-	# store local info
-	local_info_file_prefix = os.path.join(args["local_path"],target_model_name,
+	# store the attack input files (e.g., original image, target class)
+	input_file_prefix = os.path.join(args["local_path"],target_model_name,
 												args["attack_type"])
-	os.system("mkdir -p {}".format(local_info_file_prefix)) 
+	os.system("mkdir -p {}".format(input_file_prefix)) 
 	# generate the attack seeds and target class
 	target_ys_one_hot,orig_images,target_ys,orig_labels,_, x_trans_inputs = \
 	generate_attack_inputs(sess,target_model,x_test,y_test,class_num,nb_imgs,\
 		load_imgs=args["load_imgs"],load_robust=load_robust,\
-			file_path = local_info_file_prefix)
+			file_path = input_file_prefix)
 
 	start_points = np.copy(orig_images) # starting points for the gradient attacks, can be local AEs
 	# attack statistical info
@@ -181,7 +181,7 @@ def main(args):
 	pred_ls = []
 	sss = 0
 	# Prepare callbacks for model saving
-	save_dir = 'model/mnist/' # TODO: repalce with your own directory
+	save_dir = 'model/mnist/' # TODO: repalce with your own local model directory
 	callbacks_ls = []
 
 	attacked_flag = np.zeros(len(orig_labels),dtype = bool)
@@ -248,6 +248,10 @@ def main(args):
 							x = x,
 							y = y)
 
+		# store local info: a directory of random number generator is included below for the convenience in averaging the attack results
+		local_info_file_prefix = os.path.join(args["local_path"],target_model_name,
+												args["attack_type"],str(args["seed"]))
+		os.system("mkdir -p {}".format(local_info_file_prefix)) 
 		if not args["load_local_AEs"]:
 			# check do the transfer check to obtain local adversarial samples
 			if is_targeted:
@@ -277,6 +281,10 @@ def main(args):
 
 			# save local aes
 			np.save(local_info_file_prefix+'/local_aes.npy',local_aes)
+			# store local info of local aes and original seeds: used for scheduling seeds in batch attacks
+			np.save(local_info_file_prefix+'/pgd_cnt_mat.npy',pgd_cnt_mat)
+			np.savetxt(local_info_file_prefix+'/orig_img_loss.txt',orig_img_loss)
+			np.savetxt(local_info_file_prefix+'/adv_img_loss.txt',adv_img_loss)
 		else:
 			local_aes = np.load(local_info_file_prefix+'/local_aes.npy')
 			if is_targeted:
@@ -327,9 +335,9 @@ def main(args):
 	change_limit = False
 	max_lim_num = int(fine_tune_freq/class_num) 
 
-	# store gradient attack results
+	# store gradient black-box attack results
 	out_dir_prefix = os.path.join(args["save_path"], args["attack_method"],target_model_name,
-												args["attack_type"])
+												args["attack_type"],str(args["seed"])) 
 	os.system("mkdir -p {}".format(out_dir_prefix)) 
 
 	######### main loop of hybrid attack ###########
@@ -532,15 +540,10 @@ def main(args):
 
 	# save the query information of all classes
 	if not args["no_save_text"]:
-		save_name_file = os.path.join(out_dir_prefix,"query_num_vec_all_cval{}_{}_{}.txt".format(
-			args['cost_threshold'],loc_adv,args["sort_metric"]))
+		save_name_file = os.path.join(out_dir_prefix,"{}_num_queries.txt".format(loc_adv))
 		np.savetxt(save_name_file, query_num_vec,fmt='%d',delimiter=' ')
-		save_name_file = os.path.join(out_dir_prefix,"succ_vec_all_cval{}_{}_{}.txt".format(
-			args['cost_threshold'],loc_adv,args["sort_metric"]))
+		save_name_file = os.path.join(out_dir_prefix,"{}_success_flags.txt".format(loc_adv))
 		np.savetxt(save_name_file, success_vec,fmt='%d',delimiter=' ')
-		save_name_file = os.path.join(out_dir_prefix,"candi_idx_all_cval{}_{}_{}.txt".format(
-			args['cost_threshold'],loc_adv,args["sort_metric"]))
-		np.savetxt(save_name_file, np.array(candi_idx_ls),fmt='%d',delimiter=' ')
 
 if __name__ == "__main__":
 
