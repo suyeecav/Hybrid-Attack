@@ -47,16 +47,16 @@ class cifar10_tf_robust_models(object):
 			sys.exit(1)
 			model = wrap_as_vgg_model(self.x,self.y)
 			new_vars = set(tf.global_variables())
-			save_dir = '' # TODO: add your own directory		
+			save_dir = '' # TODO: add your own directory of robust vgg model		
 		elif model_name == 'adv_densenet':
 			depth = 40
 			model = wrap_as_densenet_model(depth,self.x,self.y,self.is_training,self.keep_prob,label_count=10)
 			new_vars = set(tf.global_variables())
-			save_dir = '' # TODO: add your own directory path
+			save_dir = '' # TODO: add your own directory path of robust densenet model
 		elif model_name == 'adv_resnet':
 			model = Thin_Model('eval',self.x,self.y)
 			new_vars = set(tf.global_variables())
-			save_dir = '' # TODO: add your own directory path
+			save_dir = '' # TODO: add your own directory path of robust resnet model
 		else:
 			print("please provide a valid model name!")
 			sys.exit(0)

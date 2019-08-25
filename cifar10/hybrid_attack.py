@@ -90,12 +90,12 @@ def main(args):
 	else:
 		if args["robust_type"] == "madry":
 			target_model_name = 'madry_robust'
-			model_dir = "" # TODO: pur your own directory here
+			model_dir = "" # TODO: pur your own madry robust target model directory here
 			target_model = Load_Madry_Model(sess, model_dir,bias = 0.5, scale = 255)
 		elif args["robust_type"] == "zico":
-			# TODO: will add zico cifar10 model in future
+			# Note: add zico cifar10 model will added in future
 			target_model_name = 'zico_robust'
-			model_dir = "" # TODO: put your own directory here
+			model_dir = "" # TODO: put your own robust zico target model directory here
 			target_model = Load_Zico_Model(model_dir = model_dir,bias = 0.5, scale = 255)
 		else:
 			raise NotImplementedError
@@ -146,11 +146,11 @@ def main(args):
 
 	if with_local:
 		if load_existing:
-			loc_adv = 'with_tune'
+			loc_adv = 'adv_with_tune'
 		if args["no_tune_local"]:
-			loc_adv = 'no_tune'
+			loc_adv = 'adv_no_tune'
 	else:
-		loc_adv = 'norm'
+		loc_adv = 'orig'
 	
 	# target type
 	if args["attack_type"] == "targeted":
@@ -163,23 +163,27 @@ def main(args):
 	use_loc_adv_flag = True # flag for using local adversarial examples
 	fine_tune_freq = args["fine_tune_freq"] # fine-tune the model every K images to save total model training time
 
+	# store the attack input files (e.g., original image, target class)
+	input_file_prefix = os.path.join(args["local_path"],target_model_name,
+												args["attack_type"])
+	os.system("mkdir -p {}".format(input_file_prefix)) 
 	# save locally generated information 
 	local_info_file_prefix = os.path.join(args["local_path"],target_model_name,
 												args["attack_type"],
-												local_model_folder)
+												local_model_folder,str(args["seed"]))
 	os.system("mkdir -p {}".format(local_info_file_prefix)) 
-	attack_input_file_prefix = os.path.join(args["local_path"],target_model_name,
-												args["attack_type"])
+	# attack_input_file_prefix = os.path.join(args["local_path"],target_model_name,
+	# 											args["attack_type"])
 	# save bbox attack information
 	out_dir_prefix = os.path.join(args["save_path"], args["attack_method"],target_model_name,
-												args["attack_type"],local_model_folder)
+												args["attack_type"],local_model_folder,str(args["seed"]))
 	os.system("mkdir -p {}".format(out_dir_prefix)) 
 
 	#### generate the original images and target classes ####
 	target_ys_one_hot,orig_images,target_ys,orig_labels,_, trans_test_images = \
 	generate_attack_inputs(sess,target_model,x_test,y_test,class_num,nb_imgs,\
 		load_imgs=args["load_imgs"],load_robust=load_robust,\
-			file_path = attack_input_file_prefix)
+			file_path = input_file_prefix)
 	#### end of genarating original images and target classes ####
 
 	start_points = np.copy(orig_images) # either start from orig seed or local advs
@@ -296,7 +300,8 @@ def main(args):
 		##################### generate local adversarial examples and also store the local attack information #####################
 		if not args["load_local_AEs"]:
 			# first do the transfer check to obtain local adversarial samples
-			# generated local info can be used for batch attacks
+			# generated local info can be used for batch attacks, 
+			# max_loss, min_loss, max_gap, min_gap etc are other metrics we explored for scheduling seeds based on local information
 			if is_targeted:
 				all_trans_rate, pred_labs, local_aes,pgd_cnt_mat, max_loss, min_loss, ave_loss, max_gap, min_gap, ave_gap\
 					 = local_attack_in_batches(sess,start_points[np.logical_not(attacked_flag)],\
@@ -328,10 +333,14 @@ def main(args):
 				transfer_flag = np.argmax(target_ys_one_hot, axis=1) == pred_labs
 			else:
 				transfer_flag = np.argmax(orig_labels, axis=1) != pred_labs
-			# save local aes, can also save other local info to conduct batch attack
-			np.save(out_dir_prefix+'/local_aes.npy',local_aes)
+			# save local aes
+			np.save(local_info_file_prefix+'/local_aes.npy',local_aes)
+			# store local info of local aes and original seeds: used for scheduling seeds in batch attacks
+			np.save(local_info_file_prefix+'/pgd_cnt_mat.npy',pgd_cnt_mat)
+			np.savetxt(local_info_file_prefix+'/orig_img_loss.txt',orig_img_loss)
+			np.savetxt(local_info_file_prefix+'/adv_img_loss.txt',adv_img_loss)
 		else:
-			local_aes = np.load(out_dir_prefix+'/local_aes.npy')
+			local_aes = np.load(local_info_file_prefix+'/local_aes.npy')
 			if is_targeted:
 				tmp_labels = target_ys_one_hot
 			else:
@@ -386,7 +395,7 @@ def main(args):
 		codec = 0
 		args["img_resize"] = 8
 		# replace with your directory
-		codec_dir = '' # TODO: replace with your own autoencoder directory
+		codec_dir = '' # TODO: replace with your own cifar10 autoencoder directory
 		encoder = load_model(codec_dir + 'whole_cifar10_encoder.h5')
 		decoder = load_model(codec_dir + 'whole_cifar10_decoder.h5')
 
@@ -631,17 +640,13 @@ def main(args):
 				print("remain_trans_rate")
 				print(remain_trans_rate_ls)
 
-	# save query information of all classes
+	# save the query information of all classes
 	if not args["no_save_text"]:
-		save_name_file = os.path.join(out_dir_prefix,"query_num_vec_all_cval{}_{}_{}.txt".format(
-			args['cost_threshold'],loc_adv,args["sort_metric"]))
+		save_name_file = os.path.join(out_dir_prefix,"{}_num_queries.txt".format(loc_adv))
 		np.savetxt(save_name_file, query_num_vec,fmt='%d',delimiter=' ')
-		save_name_file = os.path.join(out_dir_prefix,"succ_vec_all_cval{}_{}_{}.txt".format(
-			args['cost_threshold'],loc_adv,args["sort_metric"]))
+		save_name_file = os.path.join(out_dir_prefix,"{}_success_flags.txt".format(loc_adv))
 		np.savetxt(save_name_file, success_vec,fmt='%d',delimiter=' ')
-		save_name_file = os.path.join(out_dir_prefix,"candi_idx_all_cval{}_{}_{}.txt".format(
-			args['cost_threshold'],loc_adv,args["sort_metric"]))
-		np.savetxt(save_name_file, np.array(candi_idx_ls),fmt='%d',delimiter=' ')
+
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()

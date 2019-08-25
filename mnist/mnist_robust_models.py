@@ -11,7 +11,7 @@ from robust_model_utils.zico_model import mnist_model as zico
 from robust_model_utils.sdp_robust_model.percy_model import Model as percy
 from keras.utils import np_utils
 
-percy_weights_name = "sdp-weights" # TODO: rename if you want to change default naming
+percy_weights_name = "sdp-weights" # TODO: THIS IS ONLY NEEDED WHEN YOU ATTACK PERCY ROBUST MODEL: rename if you want to change default naming
 class PercyModel(object):
 	def __init__(self, sess, num_labels=10, model_dir="models/percy/sdp-weights", bias = 0.0, loss='cw'):
 		self.model = percy()
