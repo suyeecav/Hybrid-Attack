@@ -207,11 +207,11 @@ def main():
 		# save the generated local adversarial example ...
 		os.makedirs(prefix)
 		# save statistics
-		fname = prefix + '/adv_img_loss.npy'
+		fname = prefix + '/adv_img_loss.txt'
 		np.save(fname, adv_img_loss)
-		fname = prefix + '/orig_img_loss.npy'
+		fname = prefix + '/orig_img_loss.txt'
 		np.save(fname, orig_img_loss)
-		fname = prefix + '/pgd_cnt_mat.npy'
+		fname = prefix + '/pgd_cnt_mat.txt'
 		np.save(fname, pgd_cnt_mat)
 		# save output for local attacks
 		fname = os.path.join(prefix, 'local_aes.npy')
