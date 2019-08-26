@@ -1,7 +1,12 @@
-.DS_Store
-._.DS_Store
+__pycache__/
+*.py[cod]
+*$py.class
 
+.DS_Store
+
+._*
 ._*.py
+._*.m
 
 
 *.txt
