@@ -208,11 +208,11 @@ def main():
 		os.makedirs(prefix)
 		# save statistics
 		fname = prefix + '/adv_img_loss.txt'
-		np.save(fname, adv_img_loss)
+		np.savetxt(fname, adv_img_loss)
 		fname = prefix + '/orig_img_loss.txt'
-		np.save(fname, orig_img_loss)
+		np.savetxt(fname, orig_img_loss)
 		fname = prefix + '/pgd_cnt_mat.txt'
-		np.save(fname, pgd_cnt_mat)
+		np.savetxt(fname, pgd_cnt_mat)
 		# save output for local attacks
 		fname = os.path.join(prefix, 'local_aes.npy')
 		np.save(fname, local_aes)
