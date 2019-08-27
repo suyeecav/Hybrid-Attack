@@ -1,1 +1,1 @@
-This folder is for code of imagenet.
+This folder is for code of imagenet. To execute the NES or AutoZOOM attack, please go to specific folder and run the command `python3 main.py`. Batcha attack results of ImageNet can be obtained by running the Matlab scripts in the `batch_attacks` folder (more instructions inside). 
