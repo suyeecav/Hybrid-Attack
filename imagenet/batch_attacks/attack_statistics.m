@@ -4,7 +4,6 @@ warning off;
 
 set(0,'DefaultFigureVisible','on')
 
-% model_vec = {'madry_robust','mnist'};
 target_type_vec = {'targeted'};
 adv_type_vec = {'adv','orig'};
 dataset_vec = {'imagenet'};

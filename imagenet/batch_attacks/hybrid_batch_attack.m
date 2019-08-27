@@ -15,7 +15,8 @@ orig_class_vec = 0:9;
 class_num = 10;
 img_num = 100;
 query_sum_collect = zeros(class_num,length(adv_type_vec));
-attack_method_vec = {'autozoom','nes'};
+% attack_method_vec = {'autozoom','nes'};
+attack_method_vec = {'autozoom'};
 
 max_query_num = 100000;
 cost_base = 0;

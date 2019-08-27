@@ -6,13 +6,15 @@ set(0,'DefaultFigureVisible','on')
 adv_type_vec = {'orig'};
 orig_class_vec = 0:9;
 % random_seed_vec = {'1234','2345','3456','4567','5678'};
-random_seed_vec = {'1234'};
+random_seed_vec = {'1234'};% to reproduce exact paper resuls, need to average over 5 runs, given above.
 
 class_num = 10;
 img_num = 1000;
 query_sum_collect = zeros(class_num,length(adv_type_vec));
-attack_method_vec = {'nes','autozoom'};
-dataset_vec = {'mnist','cifar10'};
+% attack_method_vec = {'nes','autozoom'};
+attack_method_vec = {'autozoom'}; 
+% dataset_vec = {'mnist','cifar10'};
+dataset_vec = {'cifar10'}; 
 
 max_query_num = 4000;
 cost_base = 0;
@@ -24,7 +26,8 @@ for sss = 1:length(dataset_vec)
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     else
-        model_vec = {'madry_robust','densenet'};
+        % model_vec = {'madry_robust','densenet'};
+        model_vec = {'madry_robust'};
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     end
@@ -42,7 +45,8 @@ for s = 1:length(attack_method_vec)
         if strcmp(dataset,'mnist')
             local_type_vec = {'simple_local'};
         elseif strcmp(dataset,'cifar10') 
-            local_type_vec = {'modelB_modelD_modelE','adv_densenet_adv_resnet'};
+            % local_type_vec = {'modelB_modelD_modelE','adv_densenet_adv_resnet'};
+            local_type_vec = {'modelB_modelD_modelE'};
         end
         
         for kk = 1:length(local_type_vec)

@@ -8,7 +8,6 @@ warning off;
 
 set(0,'DefaultFigureVisible','on')
 
-%model_vec = {'imagenet','mnist_robust','mnist', 'cifar10','cifar10_robust',};
 model_vec = {'imagenet'};
 adv_type_vec = {'adv'};
 % random_seed_vec = {'1234','2345','3456','4567','5678'};
@@ -19,7 +18,8 @@ class_num = 10;
 img_num = 100;
 query_sum_collect = zeros(class_num,length(adv_type_vec));
 prefix =  '../';
-attack_method_vec = {'nes','autozoom'};
+% attack_method_vec = {'nes','autozoom'};
+attack_method_vec = {'autozoom'};
 metric = 'PGD-Step';
 
 max_query_num = 100000;
