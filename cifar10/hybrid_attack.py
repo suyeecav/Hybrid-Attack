@@ -90,7 +90,7 @@ def main(args):
 	else:
 		if args["robust_type"] == "madry":
 			target_model_name = 'madry_robust'
-			model_dir = "" # TODO: pur your own madry robust target model directory here
+			model_dir = "CIFAR10_models/Robust_Deep_models/Madry_robust_target_model" # TODO: pur your own madry robust target model directory here
 			target_model = Load_Madry_Model(sess, model_dir,bias = 0.5, scale = 255)
 		elif args["robust_type"] == "zico":
 			# Note: add zico cifar10 model will added in future
@@ -200,7 +200,7 @@ def main(args):
 		local_model_file_name = "cifar10_robust"
 	else:
 		local_model_file_name = "cifar10"
-	save_dir = 'model/'+local_model_file_name + '/' # TODO: replace with your own save dir of local models
+	# save_dir = 'model/'+local_model_file_name + '/' 
 	callbacks_ls = []
 	attacked_flag = np.zeros(len(orig_labels),dtype = bool)
 
@@ -256,25 +256,28 @@ def main(args):
 								validation_data=(x_test, y_test),
 								shuffle = True) 
 					else:
-						if load_existing:
-							filepath = save_dir + model_load_name + '_pretrained.h5' 
-						else:
-							filepath = save_dir + model_load_name + '.h5' 
-						checkpoint = ModelCheckpoint(filepath=filepath,
-													monitor='val_acc',
-													verbose=0,
-													save_best_only=True)
-						callbacks = [checkpoint]
-						callbacks_ls.append(callbacks)
-						if not load_existing:
-							print("Train on %d data and validate on %d data" % (len(orig_labels_nw),len(y_test)))
-							loc_model.model.fit(orig_images_nw, orig_labels_nw,
-								batch_size=args["train_batch_size"],
-								epochs=sub_epochs,
-								verbose=0,
-								validation_data=(x_test, y_test),
-								shuffle = True,
-								callbacks = callbacks)  
+						print("Yet to be implemented, please check back later, system exiting!")
+						sys.exit(0)
+						# TODO: fix the issue of loading pretrained model first and then finetune the model
+						# if load_existing:
+						# 	filepath = save_dir + model_load_name + '_pretrained.h5' 
+						# else:
+						# 	filepath = save_dir + model_load_name + '.h5' 
+						# checkpoint = ModelCheckpoint(filepath=filepath,
+						# 							monitor='val_acc',
+						# 							verbose=0,
+						# 							save_best_only=True)
+						# callbacks = [checkpoint]
+						# callbacks_ls.append(callbacks)
+						# if not load_existing:
+						# 	print("Train on %d data and validate on %d data" % (len(orig_labels_nw),len(y_test)))
+						# 	loc_model.model.fit(orig_images_nw, orig_labels_nw,
+						# 		batch_size=args["train_batch_size"],
+						# 		epochs=sub_epochs,
+						# 		verbose=0,
+						# 		validation_data=(x_test, y_test),
+						# 		shuffle = True,
+						# 		callbacks = callbacks)  
 					scores = loc_model.model.evaluate(x_test, y_test, verbose=0)
 					accuracy = scores[1]
 					print('Test accuracy of model {}: {:.4f}'.format(model_load_name,accuracy))
@@ -395,7 +398,7 @@ def main(args):
 		codec = 0
 		args["img_resize"] = 8
 		# replace with your directory
-		codec_dir = '' # TODO: replace with your own cifar10 autoencoder directory
+		codec_dir = 'CIFAR10_models/cifar10_autoencoder/' # TODO: replace with your own cifar10 autoencoder directory
 		encoder = load_model(codec_dir + 'whole_cifar10_encoder.h5')
 		decoder = load_model(codec_dir + 'whole_cifar10_decoder.h5')
 
@@ -574,14 +577,16 @@ def main(args):
 							validation_data=(x_test, y_test),
 							shuffle = True)  
 						else:
-							callbacks = callbacks_ls[sss]
-							loc_model.model.fit(S_nw, S_label_nw,
-								batch_size=args["train_batch_size"],
-								epochs=sub_epochs,
-								verbose=0,
-								validation_data=(x_test, y_test),
-								shuffle = True,
-								callbacks = callbacks)    
+							print("yet to be implemented, please check back later, system exiting!")
+							sys.exit(0)
+							# callbacks = callbacks_ls[sss]
+							# loc_model.model.fit(S_nw, S_label_nw,
+							# 	batch_size=args["train_batch_size"],
+							# 	epochs=sub_epochs,
+							# 	verbose=0,
+							# 	validation_data=(x_test, y_test),
+							# 	shuffle = True,
+							# 	callbacks = callbacks)    
 						scores = loc_model.model.evaluate(x_test, y_test, verbose=0)
 						print('Test accuracy of model {}: {:.4f}'.format(model_name,scores[1]))
 						sss += 1

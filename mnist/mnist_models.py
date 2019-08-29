@@ -261,7 +261,7 @@ class mnist_models(object):
 		self.y = y
 		self.sess = sess
 		if load_existing:
-			save_dir = '' # TODO: put your own ROOT directory of mnist normal models here
+			save_dir = 'MNIST_models/normal_models/' 
 			filepath = os.path.join(save_dir, model_name+'.h5')
 			model = load_model(filepath)
 			self.model = model
