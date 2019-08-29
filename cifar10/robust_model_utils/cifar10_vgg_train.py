@@ -10,7 +10,6 @@ from .vgg import *
 from datetime import datetime
 import time
 # from cifar10_vgg_processing import *
-import pandas as pd
 # from pgd_attack import LinfPGDAttack
 # import cifar10_input
 import os
