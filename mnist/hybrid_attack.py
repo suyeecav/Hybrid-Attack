@@ -77,15 +77,15 @@ def main(args):
 	else:
 		if args["robust_type"] == "madry":
 			target_model_name = 'madry_robust'
-			model_dir = "" # TODO: your madry robust target model directory
+			model_dir = "MNIST_models/madry_robust_model" 
 			target_model = MadryModel(sess,model_dir = model_dir,bias = 0.5)
 		elif args["robust_type"] == "zico":
 			target_model_name = 'zico_robust'
-			model_dir = ""  # TODO: your zico robust target model directory
+			model_dir = "MNIST_models/zico_robust_model/mnist.pth"  
 			target_model = ZicoModel(model_dir = model_dir,bias = 0.5)
 		elif args["robust_type"] == "percy":
 			target_model_name = 'percy_robust'
-			model_dir = "" # TODO: your percy's robust target model directory
+			model_dir = "MNIST_models/percy_robust_model/sdp_train/" 
 			target_model = PercyModel(sess,model_dir = model_dir,bias = 0.5)
 		else:
 			raise NotImplementedError
@@ -98,7 +98,7 @@ def main(args):
 		# codec = CODEC(image_size, num_channels, args["compress_mode"], use_tanh=False)
 		codec = 0
 		args["img_resize"] = 14
-		codec_dir = '' # TODO: put your mnist autoencoder weight file directory
+		codec_dir = 'MNIST_models/mnist_autoencoder/'
 		encoder = load_model(codec_dir + 'whole_mnist_encoder.h5')
 		decoder = load_model(codec_dir + 'whole_mnist_decoder.h5')
 
@@ -181,7 +181,7 @@ def main(args):
 	pred_ls = []
 	sss = 0
 	# Prepare callbacks for model saving
-	save_dir = 'model/mnist/' # TODO: repalce with your own local model directory
+	save_dir = 'MNIST_models/normal_models/' 
 	callbacks_ls = []
 
 	attacked_flag = np.zeros(len(orig_labels),dtype = bool)

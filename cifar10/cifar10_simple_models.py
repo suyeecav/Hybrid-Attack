@@ -262,7 +262,7 @@ class cifar10_models_simple(object):
 		self.keep_prob = keep_prob
 		self.test_batch_size = test_batch_size
 		if load_existing:
-			save_dir = '' # TODO: put your own ROOT directory of simple cifar10 models
+			save_dir = 'CIFAR10_models/Normal_simple_models' # TODO: put your own ROOT directory of simple cifar10 models
 			filepath = os.path.join(save_dir, model_name+'.h5')
 			model = load_model(filepath)
 			self.model = model
