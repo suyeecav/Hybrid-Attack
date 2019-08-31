@@ -88,7 +88,7 @@ for s = 1:length(attack_method_vec)
                 fileID = fopen(file_full_path);
                 formatSpec = '%f';
                 adv_img_loss = fscanf(fileID,formatSpec);
-                direct_transfer_idx = adv_img_loss == 0;
+                direct_transfer_idx = adv_img_loss == 0;                    
                 
                 for k = 1:length(adv_type_vec)
                     adv_type = adv_type_vec{k};

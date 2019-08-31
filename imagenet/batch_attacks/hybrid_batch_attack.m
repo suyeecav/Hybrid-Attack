@@ -129,7 +129,14 @@ for s = 1:length(attack_method_vec)
                     fileID = fopen(file_full_path);
                     formatSpec = '%f';
                     orig_img_loss = fscanf(fileID,formatSpec);
-                    thres_vec_ave_gap = adv_img_loss;
+                    % thres_vec_ave_gap = adv_img_loss;
+                    
+                    % load average gap, used for breaking ties
+                    file_name = ['ave_gap.txt'];
+                    file_full_path=fullfile(file_path_head,file_name);
+                    fileID = fopen(file_full_path);
+                    formatSpec = '%f';
+                    thres_vec_ave_gap = fscanf(fileID,formatSpec); 
                 %% end of loading files
                 
                     % generate optimal adv num vector 

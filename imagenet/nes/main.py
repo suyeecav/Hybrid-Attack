@@ -59,7 +59,7 @@ def local_attack_in_batches(sess, data, labels, eval_batch_size, attack_graph,mo
 		bend = min(bstart + eval_batch_size, num_eval_examples)
 		x_batch = data[bstart:bend, :]
 		y_batch = labels[bstart:bend,:]
-		local_aes_batch, _, _, pgd_stp_cnt_mat = attack_graph.attack(x_batch, y_batch, sess,clip_min = clip_min,clip_max = clip_max)
+		local_aes_batch, pgd_stp_cnt_mat = attack_graph.attack(x_batch, y_batch, sess,clip_min = clip_min,clip_max = clip_max)
 		local_aes.extend(local_aes_batch)
 		pgd_cnt_mat.extend(pgd_stp_cnt_mat)
 	if model:

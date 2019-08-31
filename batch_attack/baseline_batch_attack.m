@@ -103,7 +103,7 @@ for s = 1:length(attack_method_vec)
                     file_full_path=fullfile(file_path_head,orig_loss_name);
                     fileID = fopen(file_full_path);
                     formatSpec = '%f';
-                    orig_img_loss = fscanf(fileID,formatSpec);
+                    orig_img_loss = fscanf(fileID,formatSpec);                    
                 %% end of loading files
                  
                     % generate optimal adv num vector 
