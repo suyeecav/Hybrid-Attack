@@ -256,7 +256,7 @@ def main(args):
 								validation_data=(x_test, y_test),
 								shuffle = True) 
 					else:
-						print("Yet to be implemented, please check back later, system exiting!")
+						print("Saving local model is yet to be implemented, please check back later, system exiting!")
 						sys.exit(0)
 						# TODO: fix the issue of loading pretrained model first and then finetune the model
 						# if load_existing:
@@ -342,6 +342,7 @@ def main(args):
 			np.save(local_info_file_prefix+'/pgd_cnt_mat.npy',pgd_cnt_mat)
 			np.savetxt(local_info_file_prefix+'/orig_img_loss.txt',orig_img_loss)
 			np.savetxt(local_info_file_prefix+'/adv_img_loss.txt',adv_img_loss)
+			np.savetxt(local_info_file_prefix+'/ave_gap.txt',ave_gap)
 		else:
 			local_aes = np.load(local_info_file_prefix+'/local_aes.npy')
 			if is_targeted:
@@ -577,7 +578,7 @@ def main(args):
 							validation_data=(x_test, y_test),
 							shuffle = True)  
 						else:
-							print("yet to be implemented, please check back later, system exiting!")
+							print("Saving local model is yet to be implemented, please check back later, system exiting!")
 							sys.exit(0)
 							# callbacks = callbacks_ls[sss]
 							# loc_model.model.fit(S_nw, S_label_nw,

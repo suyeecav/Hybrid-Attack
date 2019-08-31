@@ -156,7 +156,7 @@ for s = 1:length(attack_method_vec)
                         different_local_direct_transfer{kk} = direct_transfer_idx;
                     end
         
-                    fprintf('Query/AE: %.3f; Query/Seed: %.3f, Success Rate %.3f; Transfer Rate %f Non-transfer Mean Cost: %.3f Non-Transfer Succ Rate: %.3f \n',...
+                    fprintf('Query/AE: %.3f; Query/Seed: %.3f, Success Rate %.3f; Transfer Rate %f Query/Search (Non-transfer) Cost: %.3f Query/Search (Non-Transfer) Succ Rate: %.3f \n',...
                        query_ae, query_seed,succ_rate,trans_rate,query_search,sum(non_trans_succ_rate_vec)/length(non_trans_succ_rate_vec));
 
                    % store the cost info of individual runs

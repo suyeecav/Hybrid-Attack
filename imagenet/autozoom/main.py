@@ -202,6 +202,8 @@ def main(args):
 		np.savetxt(fname, orig_img_loss)
 		fname = prefix + '/pgd_cnt_mat.txt'
 		np.savetxt(fname, pgd_cnt_mat)
+		fname = prefix + '/pgd_cnt_mat.txt'
+		np.savetxt(fname, pgd_cnt_mat)
 
 		# save output for local attacks
 		fname = prefix + '/local_aes.npy'

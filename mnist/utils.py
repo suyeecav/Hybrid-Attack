@@ -10,25 +10,25 @@ import math
 from sklearn.metrics import accuracy_score
 
 def save_img(img, img_size = 32,num_channel = 3,name = "output.png"):
-	if len(img.shape) <=2:
-		img = np.reshape(img,(-1,img_size,img_size,num_channel))
-	# np.save(name, img)
-	fig = np.around((img+0.5)*255)
-	fig = fig.astype(np.uint8).squeeze()
-	pic = Image.fromarray(fig)
-	pic.save(name)
+    if len(img.shape) <=2:
+        img = np.reshape(img,(-1,img_size,img_size,num_channel))
+    # np.save(name, img)
+    fig = np.around((img+0.5)*255)
+    fig = fig.astype(np.uint8).squeeze()
+    pic = Image.fromarray(fig)
+    pic.save(name)
 
 # directly wraps based on the model
 class keras_model_wrapper():
-	def __init__(self,model,x = None,y = None):
-		# :param: x: placeholder for inputs
-		# :param: y: placeholder for labels
-		self.keras_model = model
-		model_wrap = KerasModelWrapper(model)
-		self.predictions = model_wrap.get_logits(x)
-		self.probs = tf.nn.softmax(logits = self.predictions)
-		self.loss = tf.nn.softmax_cross_entropy_with_logits(labels = y,
-			logits = self.predictions) 
+    def __init__(self,model,x = None,y = None):
+        # :param: x: placeholder for inputs
+        # :param: y: placeholder for labels
+        self.keras_model = model
+        model_wrap = KerasModelWrapper(model)
+        self.predictions = model_wrap.get_logits(x)
+        self.probs = tf.nn.softmax(logits = self.predictions)
+        self.loss = tf.nn.softmax_cross_entropy_with_logits(labels = y,
+            logits = self.predictions) 
 
 def generate_attack_inputs(sess,model,x_test,y_test,class_num,nb_imgs, load_imgs = False,load_robust = True,file_path = 'local_info/'):
     """ generate inputs to both the local and target models, including labels
@@ -111,22 +111,22 @@ def generate_attack_inputs(sess,model,x_test,y_test,class_num,nb_imgs, load_imgs
     return target_ys_one_hot,orig_images,target_ys,orig_labels,all_true_ids, trans_test_images
 
 def compute_cw_loss(sess,model,data,labs,targeted = True,load_robust = True):
-	""" CW loss will be calculated in this func
-	:param: model: provide prediction scores
-	:param: x: image instance, one hot form
-	:param: y: specified instance
+    """ CW loss will be calculated in this func
+    :param: model: provide prediction scores
+    :param: x: image instance, one hot form
+    :param: y: specified instance
     """
-	output = (model.predict_prob(data)) #shape:(?,class_num)
-	real = np.sum(labs*output,axis = 1)
-	other = np.amax((1-labs)*output - (labs*10000),1)
-	if targeted:
-		loss = np.maximum(0,np.log(other + 1e-30) - np.log(real + 1e-30))
-		free_idx = np.where(real >= other)[0]
-	else:
-		loss = np.maximum(0,np.log(real + 1e-30) - np.log(other + 1e-30))
-		free_idx = np.where(real <= other)[0]
-	# print("free_idx:",free_idx)
-	return loss, free_idx #shape (?,)
+    output = (model.predict_prob(data)) #shape:(?,class_num)
+    real = np.sum(labs*output,axis = 1)
+    other = np.amax((1-labs)*output - (labs*10000),1)
+    if targeted:
+        loss = np.maximum(0,np.log(other + 1e-30) - np.log(real + 1e-30))
+        free_idx = np.where(real >= other)[0]
+    else:
+        loss = np.maximum(0,np.log(real + 1e-30) - np.log(other + 1e-30))
+        free_idx = np.where(real <= other)[0]
+    # print("free_idx:",free_idx)
+    return loss, free_idx #shape (?,)
 
 
 def select_next_seed(img_loss,attacked_flag,sort_metric, by_class,fine_tune_freq,class_num,per_cls_cnt,cls_order,change_limit,max_lim_num):
@@ -189,24 +189,24 @@ def mixup_data(x,y,alpha = 1.0):
 
 # evaluate models with PGD attack in batches
 def local_attack_in_batches(sess, data,labels,eval_batch_size,attack_graph,model = None,clip_min = 0,clip_max = 1,load_robust=True):
-	# Iterate over the samples batch-by-batch
-	num_eval_examples = len(data)
-	num_batches = int(math.ceil(num_eval_examples / eval_batch_size))
-	X_test_adv = [] # adv accumulator
-	pgd_cnt_mat = []
-	# print('Iterating over {} batches'.format(num_batches))
-	for ibatch in range(num_batches):
-		bstart = ibatch * eval_batch_size
-		bend = min(bstart + eval_batch_size, num_eval_examples)
-		# print('batch size: {}'.format(bend - bstart))
-		x_batch = data[bstart:bend, :]
-		y_batch = labels[bstart:bend,:]
-		x_batch_adv_sub, _, _, pgd_stp_cnt_mat = attack_graph.attack(x_batch, y_batch, sess, clip_min = clip_min,clip_max = clip_max)
-		X_test_adv.extend(x_batch_adv_sub)
-		pgd_cnt_mat.extend(pgd_stp_cnt_mat)
-	if model:
-		pred_labs = np.argmax(model.predict_prob(np.array(X_test_adv)),axis=1)
-		accuracy = accuracy_score(np.argmax(labels,axis=1), pred_labs)
-	else:
-		pred_labs = accuracy = 0
-	return accuracy, pred_labs, np.array(X_test_adv), np.array(pgd_cnt_mat)
+    # Iterate over the samples batch-by-batch
+    num_eval_examples = len(data)
+    num_batches = int(math.ceil(num_eval_examples / eval_batch_size))
+    X_test_adv = [] # adv accumulator
+    pgd_cnt_mat = []
+    # print('Iterating over {} batches'.format(num_batches))
+    for ibatch in range(num_batches):
+        bstart = ibatch * eval_batch_size
+        bend = min(bstart + eval_batch_size, num_eval_examples)
+        # print('batch size: {}'.format(bend - bstart))
+        x_batch = data[bstart:bend, :]
+        y_batch = labels[bstart:bend,:]
+        x_batch_adv_sub, _, _, pgd_stp_cnt_mat = attack_graph.attack(x_batch, y_batch, sess, clip_min = clip_min,clip_max = clip_max)
+        X_test_adv.extend(x_batch_adv_sub)
+        pgd_cnt_mat.extend(pgd_stp_cnt_mat)
+    if model:
+        pred_labs = np.argmax(model.predict_prob(np.array(X_test_adv)),axis=1)
+        accuracy = accuracy_score(np.argmax(labels,axis=1), pred_labs)
+    else:
+        pred_labs = accuracy = 0
+    return accuracy, pred_labs, np.array(X_test_adv), np.array(pgd_cnt_mat)
