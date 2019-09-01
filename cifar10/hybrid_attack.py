@@ -339,7 +339,7 @@ def main(args):
 			# save local aes
 			np.save(local_info_file_prefix+'/local_aes.npy',local_aes)
 			# store local info of local aes and original seeds: used for scheduling seeds in batch attacks
-			np.save(local_info_file_prefix+'/pgd_cnt_mat.npy',pgd_cnt_mat)
+			np.savetxt(local_info_file_prefix+'/pgd_cnt_mat.txt',pgd_cnt_mat)
 			np.savetxt(local_info_file_prefix+'/orig_img_loss.txt',orig_img_loss)
 			np.savetxt(local_info_file_prefix+'/adv_img_loss.txt',adv_img_loss)
 			np.savetxt(local_info_file_prefix+'/ave_gap.txt',ave_gap)

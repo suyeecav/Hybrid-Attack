@@ -255,11 +255,13 @@ def main(args):
 		if not args["load_local_AEs"]:
 			# check do the transfer check to obtain local adversarial samples
 			if is_targeted:
-				all_trans_rate, pred_labs, local_aes,pgd_cnt_mat = local_attack_in_batches(sess,start_points[np.logical_not(attacked_flag)],\
+				all_trans_rate, pred_labs, local_aes,pgd_cnt_mat, max_loss, min_loss,\
+             ave_loss, max_gap, min_gap, ave_gap = local_attack_in_batches(sess,start_points[np.logical_not(attacked_flag)],\
 				target_ys_one_hot[np.logical_not(attacked_flag)],eval_batch_size = 500,\
 				attack_graph = local_attack_graph,model = target_model,clip_min=clip_min,clip_max=clip_max,load_robust=load_robust)
 			else:
-				all_trans_rate, pred_labs, local_aes,pgd_cnt_mat = local_attack_in_batches(sess,start_points[np.logical_not(attacked_flag)],\
+				all_trans_rate, pred_labs, local_aes,pgd_cnt_mat,max_loss, min_loss,\
+             ave_loss, max_gap, min_gap, ave_gap = local_attack_in_batches(sess,start_points[np.logical_not(attacked_flag)],\
 				orig_labels[np.logical_not(attacked_flag)],eval_batch_size = 500,\
 				attack_graph = local_attack_graph,model = target_model,clip_min=clip_min,clip_max=clip_max,load_robust=load_robust)
 
@@ -282,9 +284,10 @@ def main(args):
 			# save local aes
 			np.save(local_info_file_prefix+'/local_aes.npy',local_aes)
 			# store local info of local aes and original seeds: used for scheduling seeds in batch attacks
-			np.save(local_info_file_prefix+'/pgd_cnt_mat.npy',pgd_cnt_mat)
+			np.savetxt(local_info_file_prefix+'/pgd_cnt_mat.txt',pgd_cnt_mat)
 			np.savetxt(local_info_file_prefix+'/orig_img_loss.txt',orig_img_loss)
 			np.savetxt(local_info_file_prefix+'/adv_img_loss.txt',adv_img_loss)
+			np.savetxt(local_info_file_prefix+'/ave_gap.txt',ave_gap)
 		else:
 			local_aes = np.load(local_info_file_prefix+'/local_aes.npy')
 			if is_targeted:
@@ -294,17 +297,18 @@ def main(args):
 			pred_labs = np.argmax(target_model.predict_prob(np.array(local_aes)),axis=1)
 			print('correct number',np.sum(pred_labs == np.argmax(tmp_labels,axis=1)))
 			all_trans_rate = accuracy_score(np.argmax(tmp_labels,axis=1), pred_labs)
-
 		if not is_targeted:
 			all_trans_rate = 1 - all_trans_rate
 		print('** Transfer Rate: **' + str(all_trans_rate))  
 
 		# independent test set for checking transferability: for experiment purpose and does not count for query numbers
 		if is_targeted:
-			ind_all_trans_rate, pred_labs, _,_ = local_attack_in_batches(sess,x_trans_inputs,target_ys_one_hot,eval_batch_size = 500,\
+			ind_all_trans_rate, pred_labs, _,_, _, _,\
+             _, _, _, _ = local_attack_in_batches(sess,x_trans_inputs,target_ys_one_hot,eval_batch_size = 500,\
 			attack_graph = local_attack_graph,model = target_model,clip_min=clip_min,clip_max=clip_max,load_robust=load_robust)
 		else:
-			ind_all_trans_rate, pred_labs, _,_ = local_attack_in_batches(sess,x_trans_inputs,orig_labels,eval_batch_size = 500,\
+			ind_all_trans_rate, pred_labs, _,_,_, _,\
+             _, _, _, _ = local_attack_in_batches(sess,x_trans_inputs,orig_labels,eval_batch_size = 500,\
 			attack_graph = local_attack_graph,model = target_model,clip_min=clip_min,clip_max=clip_max,load_robust=load_robust)
 		
 		# record the queries spent by quering the local samples
@@ -490,11 +494,13 @@ def main(args):
 					if not attacked_flag.all():
 						# first check for not attacked seeds
 						if is_targeted:
-							remain_trans_rate, pred_labs, remain_local_aes,_ = local_attack_in_batches(sess,orig_images[np.logical_not(attacked_flag)],\
+							remain_trans_rate, pred_labs, remain_local_aes,_, _, _,\
+             				_, _, _, _ = local_attack_in_batches(sess,orig_images[np.logical_not(attacked_flag)],\
 							target_ys_one_hot[np.logical_not(attacked_flag)],eval_batch_size = 500,\
 							attack_graph = local_attack_graph,model = target_model,clip_min=clip_min,clip_max=clip_max,load_robust=load_robust)
 						else:
-							remain_trans_rate, pred_labs, remain_local_aes,_ = local_attack_in_batches(sess,orig_images[np.logical_not(attacked_flag)],\
+							remain_trans_rate, pred_labs, remain_local_aes,_,_, _,\
+             				_, _, _, _ = local_attack_in_batches(sess,orig_images[np.logical_not(attacked_flag)],\
 							orig_labels[np.logical_not(attacked_flag)],eval_batch_size = 500,\
 							attack_graph = local_attack_graph,model = target_model,clip_min=clip_min,clip_max=clip_max,load_robust=load_robust)
 						if not is_targeted:
@@ -507,10 +513,12 @@ def main(args):
 
 						# transfer rate check with independent test examples
 						if is_targeted:
-							all_trans_rate, pred_labs, _,_ = local_attack_in_batches(sess,x_trans_inputs,target_ys_one_hot,eval_batch_size = 500,\
+							all_trans_rate, pred_labs, _,_, _, _,\
+             			_, _, _, _ = local_attack_in_batches(sess,x_trans_inputs,target_ys_one_hot,eval_batch_size = 500,\
 							attack_graph = local_attack_graph,model = target_model,clip_min=clip_min,clip_max=clip_max,load_robust=load_robust)
 						else:
-							all_trans_rate, pred_labs, _,_ = local_attack_in_batches(sess,x_trans_inputs,orig_labels,eval_batch_size = 500,\
+							all_trans_rate, pred_labs, _,_, _, _,\
+             			_, _, _, _ = local_attack_in_batches(sess,x_trans_inputs,orig_labels,eval_batch_size = 500,\
 							attack_graph = local_attack_graph,model = target_model,clip_min=clip_min,clip_max=clip_max,load_robust=load_robust)
 						if not is_targeted:
 							all_trans_rate = 1 - all_trans_rate
