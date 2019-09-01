@@ -122,8 +122,48 @@ class LinfPGDAttack:
 			x += self.a * np.sign(grad)
 			x = np.clip(x, x_nat - self.epsilon, x_nat + self.epsilon) 
 			x = np.clip(x, clip_min, clip_max) # ensure valid pixel range
+			if i == self.k -1:
+				max_loss, min_loss, ave_loss, max_gap, \
+				min_gap, ave_gap = self.get_candi_metric(sess,x,x_nat,y)	
 			######## end of main attack #############
 		
-		return x, np.array(grads),np.array(x_s),pgd_stp_cnt_mat
+		return x, np.array(grads),np.array(x_s),pgd_stp_cnt_mat, max_loss, min_loss, ave_loss, max_gap, min_gap, ave_gap
 
- 
+	def get_candi_metric(self,sess,x,x_nat,y,sel_criteria = None):
+		'''
+		-- this function currently returns: 1: loss function of each value, 2: confidence value gap
+		-- currently, return both the maximum, minimum and average value.  
+		-- useful for prioritizing seeds based on local model information 
+		'''
+		max_loss = (-1e10) * np.ones(len(x))
+		min_loss = (1e10) * np.ones(len(x))
+		ave_loss = np.zeros(len(x))
+		max_gap = (-1e10) * np.ones(len(x))
+		min_gap = (1e10) * np.ones(len(x))
+		ave_gap = np.zeros(len(x))
+		for j in range(len(self.model_ls)):
+			model = self.model_ls[j]
+			feed_dict = {self.x:x,self.y:y}
+			loss, preds = sess.run([model.loss, model.predictions],feed_dict = feed_dict)
+			real = []
+			other = []
+			for idx in range(len(y)):
+				real.append(preds[idx,np.argmax(y[idx])])
+				other.append(np.max(preds[idx,np.logical_not(y[idx])]))
+			real = np.array(real)
+			other = np.array(other)
+			if self.targeted:
+				confidence_gap = real - other
+				loss = -loss
+			else:
+				confidence_gap = other - real
+			# update the corresponding metrics
+			max_loss = np.maximum(max_loss,loss)
+			min_loss = np.minimum(min_loss,loss)
+			ave_loss += loss
+			max_gap = np.maximum(max_gap,confidence_gap)
+			min_gap = np.minimum(min_gap,confidence_gap)
+			ave_gap += confidence_gap
+		ave_loss = ave_loss/len(self.model_ls)
+		ave_gap = ave_gap/len(self.model_ls)
+		return max_loss, min_loss, ave_loss, max_gap, min_gap, ave_gap 

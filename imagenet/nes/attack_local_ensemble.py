@@ -31,7 +31,7 @@ class LinfPGDAttack:
 		self.targeted = targeted
 
 		self.grad_list = []
-		self.attack_lost_list = []
+		self.attack_loss_list = []
 
 		for model in model_ls:
 			if loss_func == 'xent':
@@ -137,10 +137,10 @@ class LinfPGDAttack:
 				max_loss, min_loss, ave_loss, max_gap, \
 				min_gap, ave_gap = self.get_candi_metric(sess, x, x_nat, y)
 		
-		return x, pgd_stp_cnt_mat
+		return x, max_loss, min_loss, ave_loss, max_gap, min_gap, ave_gap, pgd_stp_cnt_mat
 
 
-	def get_candi_metric(self, sess, x, x_nat):
+	def get_candi_metric(self, sess, x, x_nat, y):
 		'''
 		-- this function currently returns: 1: loss function of each value, 2: confidence value gap
 		-- currently, return both the maximum, minimum and average value.  
@@ -154,9 +154,7 @@ class LinfPGDAttack:
 		ave_gap = np.zeros(len(x))
 		for j in range(len(self.model_ls)):
 			model = self.model_ls[j]
-			feed_dict = {self.x:x,self.y:y,
-			self.is_training:False,
-			self.keep_prob:1}
+			feed_dict = {self.x:x,self.y:y}
 			loss, preds = sess.run([model.loss, model.predictions],feed_dict = feed_dict)
 			real = []
 			other = []

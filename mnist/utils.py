@@ -187,13 +187,46 @@ def mixup_data(x,y,alpha = 1.0):
     # y_a, y_b = y, y[index]
     return mixed_x, mixed_y, lam 
 
-# evaluate models with PGD attack in batches
+# # evaluate models with PGD attack in batches
+# def local_attack_in_batches(sess, data,labels,eval_batch_size,attack_graph,model = None,clip_min = 0,clip_max = 1,load_robust=True):
+#     # Iterate over the samples batch-by-batch
+#     num_eval_examples = len(data)
+#     num_batches = int(math.ceil(num_eval_examples / eval_batch_size))
+#     X_test_adv = [] # adv accumulator
+#     pgd_cnt_mat = []
+#     # print('Iterating over {} batches'.format(num_batches))
+#     for ibatch in range(num_batches):
+#         bstart = ibatch * eval_batch_size
+#         bend = min(bstart + eval_batch_size, num_eval_examples)
+#         # print('batch size: {}'.format(bend - bstart))
+#         x_batch = data[bstart:bend, :]
+#         y_batch = labels[bstart:bend,:]
+#         x_batch_adv_sub, _, _, pgd_stp_cnt_mat, max_loss, min_loss,\
+#              ave_loss, max_gap, min_gap, ave_gap = attack_graph.attack(x_batch, y_batch, sess, clip_min = clip_min,clip_max = clip_max)
+#         X_test_adv.extend(x_batch_adv_sub)
+#         pgd_cnt_mat.extend(pgd_stp_cnt_mat)
+#     if model:
+#         pred_labs = np.argmax(model.predict_prob(np.array(X_test_adv)),axis=1)
+#         accuracy = accuracy_score(np.argmax(labels,axis=1), pred_labs)
+#     else:
+#         pred_labs = accuracy = 0
+#     return accuracy, pred_labs, np.array(X_test_adv), np.array(pgd_cnt_mat), max_loss, min_loss,\
+#              ave_loss, max_gap, min_gap, ave_gap
+
+# evaluate the acuracy of models on batches
 def local_attack_in_batches(sess, data,labels,eval_batch_size,attack_graph,model = None,clip_min = 0,clip_max = 1,load_robust=True):
-    # Iterate over the samples batch-by-batch
+    """Iterate over the samples in batches to attack local models"""
     num_eval_examples = len(data)
     num_batches = int(math.ceil(num_eval_examples / eval_batch_size))
     X_test_adv = [] # adv accumulator
     pgd_cnt_mat = []
+    max_losses = []
+    min_losses = []
+    ave_losses = []
+    max_gaps = []
+    min_gaps = []
+    ave_gaps = []
+    # succ_model_sum_s = []
     # print('Iterating over {} batches'.format(num_batches))
     for ibatch in range(num_batches):
         bstart = ibatch * eval_batch_size
@@ -201,12 +234,33 @@ def local_attack_in_batches(sess, data,labels,eval_batch_size,attack_graph,model
         # print('batch size: {}'.format(bend - bstart))
         x_batch = data[bstart:bend, :]
         y_batch = labels[bstart:bend,:]
-        x_batch_adv_sub, _, _, pgd_stp_cnt_mat = attack_graph.attack(x_batch, y_batch, sess, clip_min = clip_min,clip_max = clip_max)
+        x_batch_adv_sub,_,_,pgd_stp_cnt_mat, max_loss, min_loss,\
+            ave_loss, max_gap, min_gap, ave_gap = attack_graph.attack(x_batch, y_batch, sess, clip_min = clip_min,clip_max = clip_max)
+        # print("last element",ave_gap[-1])
+        # combine all results in all batches
         X_test_adv.extend(x_batch_adv_sub)
         pgd_cnt_mat.extend(pgd_stp_cnt_mat)
+        max_losses.extend(max_loss)
+        min_losses.extend(min_loss)
+        ave_losses.extend(ave_loss)
+        max_gaps.extend(max_gap)
+        min_gaps.extend(min_gap)
+        ave_gaps.extend(ave_gap)
+        # succ_model_sum_s.extend(succ_model_sum)
+    X_test_adv = np.array(X_test_adv)
+    pgd_cnt_mat = np.array(pgd_cnt_mat) 
+    max_gaps = np.array(max_gaps)
+    min_gaps = np.array(min_gaps)
+    ave_gaps = np.array(ave_gaps)
+    max_losses = np.array(max_losses)
+    min_losses = np.array(min_losses)
+    ave_losses = np.array(ave_losses)
+    # succ_model_sum_s = np.array(succ_model_sum_s)
+
     if model:
         pred_labs = np.argmax(model.predict_prob(np.array(X_test_adv)),axis=1)
+        print('correct number',np.sum(pred_labs == np.argmax(labels,axis=1)))
         accuracy = accuracy_score(np.argmax(labels,axis=1), pred_labs)
     else:
         pred_labs = accuracy = 0
-    return accuracy, pred_labs, np.array(X_test_adv), np.array(pgd_cnt_mat)
+    return accuracy, pred_labs, X_test_adv, pgd_cnt_mat, max_losses, min_losses, ave_losses, max_gaps, min_gaps, ave_gaps

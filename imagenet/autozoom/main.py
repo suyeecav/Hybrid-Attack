@@ -39,22 +39,46 @@ def local_attack_in_batches(sess, data, labels, eval_batch_size, attack_graph,mo
 	num_batches = int(math.ceil(num_eval_examples / eval_batch_size))
 	local_aes = [] # adv accumulator
 	pgd_cnt_mat = []
-	# print('Iterating over {} batches'.format(num_batches))
+	max_losses = []
+	min_losses = []
+	ave_losses = []
+	max_gaps = []
+	min_gaps = []
+	ave_gaps = []
 	for ibatch in range(num_batches):
 		bstart = ibatch * eval_batch_size
 		bend = min(bstart + eval_batch_size, num_eval_examples)
-		# print('batch size: {}'.format(bend - bstart))
 		x_batch = data[bstart:bend, :]
 		y_batch = labels[bstart:bend,:]
-		local_aes_batch, _, _, pgd_stp_cnt_mat = attack_graph.attack(x_batch, y_batch, sess,clip_min = clip_min,clip_max = clip_max)
+		local_aes_batch, max_loss, min_loss, ave_loss, \
+			max_gap, min_gap, ave_gap, pgd_stp_cnt_mat = attack_graph.attack(x_batch, 
+																			y_batch, 
+																			sess,
+																			clip_min = clip_min,
+																			clip_max = clip_max)
 		local_aes.extend(local_aes_batch)
 		pgd_cnt_mat.extend(pgd_stp_cnt_mat)
+		max_losses.extend(max_loss)
+		min_losses.extend(min_loss)
+		ave_losses.extend(ave_loss)
+		max_gaps.extend(max_gap)
+		min_gaps.extend(min_gap)
+		ave_gaps.extend(ave_gap)
 	if model:
 		pred_labs = np.argmax(model.predict_prob(np.array(local_aes)),axis=1)
-		accuracy = accuracy_score(np.argmax(labels,axis=1), pred_labs)
+		accuracy = accuracy_score(np.argmax(labels, axis=1), pred_labs)
 	else:
 		pred_labs = accuracy = 0
-	return accuracy, pred_labs, np.array(local_aes), pgd_cnt_mat
+
+	pgd_cnt_mat = np.array(pgd_cnt_mat)	
+	max_gaps = np.array(max_gaps)
+	min_gaps = np.array(min_gaps)
+	ave_gaps = np.array(ave_gaps)
+	max_losses = np.array(max_losses)
+	min_losses = np.array(min_losses)
+	ave_losses = np.array(ave_losses)
+
+	return accuracy, pred_labs, np.array(local_aes), pgd_cnt_mat, max_losses, min_losses, ave_losses, max_gaps, min_gaps, ave_gaps
 
 def generate_attack_inputs(model, x_test, y_test, class_num, nb_imgs):
 	y_probs = model.predict_prob(x_test)
@@ -173,12 +197,27 @@ def main(args):
 							x = x,
 							y = y)
 		# pgd attack to local models and generate adversarial example seed
+				# pgd attack to local models and generate adversarial example seed
 		if targeted_true:
-			_, pred_labs, local_aes,pgd_cnt_mat = local_attack_in_batches(sess, orig_images, target_ys_one_hot,eval_batch_size = 1,\
-		attack_graph = attack_sub_pgd_tar,model = target_model,clip_min=clip_min,clip_max=clip_max)
+			_, pred_labs, local_aes, pgd_cnt_mat, max_loss, \
+			min_loss, ave_loss, max_gap, min_gap, ave_gap = local_attack_in_batches(sess, 
+																					orig_images, 
+																					target_ys_one_hot, 
+																					eval_batch_size = 1,
+																					attack_graph=attack_sub_pgd_tar, 
+																					model=target_model, 
+																					clip_min=clip_min, 
+																					clip_max=clip_max)
 		else:
-			_, pred_labs, local_aes, pgd_cnt_mat  = local_attack_in_batches(sess, orig_images,orig_labels,eval_batch_size = 1,\
-		attack_graph = attack_sub_pgd_tar,model = target_model,clip_min=clip_min,clip_max=clip_max)
+			_, pred_labs, local_aes, pgd_cnt_mat, max_loss, \
+			min_loss, ave_loss, max_gap, min_gap, ave_gap = local_attack_in_batches(sess, 
+																					orig_images, 
+																					orig_labels,
+																					eval_batch_size = 1,
+																					attack_graph=attack_sub_pgd_tar, 
+																					model=target_model, 
+																					clip_min=clip_min, 
+																					clip_max=clip_max)
 
 		# calculate the loss for all adversarial seeds
 		if targeted_true:
@@ -202,8 +241,18 @@ def main(args):
 		np.savetxt(fname, orig_img_loss)
 		fname = prefix + '/pgd_cnt_mat.txt'
 		np.savetxt(fname, pgd_cnt_mat)
-		fname = prefix + '/pgd_cnt_mat.txt'
-		np.savetxt(fname, pgd_cnt_mat)
+		fname = prefix + '/max_loss.txt'
+		np.savetxt(fname, max_loss)
+		fname = prefix + '/min_loss.txt'
+		np.savetxt(fname, min_loss)
+		fname = prefix + '/ave_loss.txt'
+		np.savetxt(fname, ave_loss)
+		fname = prefix + '/max_gap.txt'
+		np.savetxt(fname, max_gap)
+		fname = prefix + '/min_gap.txt'
+		np.savetxt(fname, min_gap)
+		fname = prefix + '/ave_gap.txt'
+		np.savetxt(fname, ave_gap)
 
 		# save output for local attacks
 		fname = prefix + '/local_aes.npy'
