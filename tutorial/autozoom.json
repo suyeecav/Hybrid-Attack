@@ -1,0 +1,23 @@
+{
+  "batch_size": 1,
+  "init_const": 1,
+  "max_iterations": 50000,
+  "print_every": 1000,
+  "attack_type": "targeted",
+  "confidence": 0,
+  "codec_prefix": null,
+  "random_target": false,
+  "num_rand_vec": 1,
+  "img_offset": 0,
+  "img_resize": null,
+  "switch_iterations": 1000,
+  "attack_single_img": null,
+  "single_img_target_label": null,
+  "compress_mode": null,
+  "codec_dir": "./codec/",
+  "cost_threshold": 0.047058823529411764,
+  "use_zvalue": false,
+  "dist_metric": "li",
+  "lr": 0.002,
+  "use_tanh": false
+}

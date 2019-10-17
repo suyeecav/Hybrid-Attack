@@ -1,0 +1,22 @@
+{
+  "samples_per_draw": 50,
+  "nes_batch_size": 50,
+  "sigma": 0.255,
+  "epsilon": 12.0,
+  "learning_rate": 2.55,
+  "log_iters": 1,
+  "momentum": 0.9,
+  "max_queries": 100000,
+  "save_iters": 50,
+  "plateau_drop": 2.0,
+  "min_lr_ratio": 200,
+  "plateau_length": 5,
+  "max_lr": 2.55,
+  "min_lr": 0.01275,
+  "attack_type": "targeted",
+  "upper": 255.0,
+  "lower": 0.0,
+  "bstart": 0,
+  "bend": 100,
+  "K": 30
+}
