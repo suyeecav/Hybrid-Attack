@@ -39,7 +39,7 @@ def main(args):
 	else:
 		load_robust = True
 	# Set TF random seed to improve reproducibility
-	tf.set_random_seed(args["seed"])
+	# tf.set_random_seed(args["seed"])
 	data  = MNIST()
 	if not hasattr(K, "tf"):
 		raise RuntimeError("This tutorial requires keras to be configured"
@@ -168,6 +168,12 @@ def main(args):
 		load_imgs=args["load_imgs"],load_robust=load_robust,\
 			file_path = input_file_prefix)
 
+	# images are generated based on seed (1234), reassign 
+	# the random to improve reproducibility
+	random.seed(args["seed"])
+	np.random.seed(args["seed"])
+	tf.set_random_seed(args["seed"])
+
 	start_points = np.copy(orig_images) # starting points for the gradient attacks, can be local AEs
 	# attack statistical info
 	dist_record = np.zeros(len(orig_labels),dtype = float)  
@@ -281,13 +287,14 @@ def main(args):
 				orig_img_loss, free_idx = compute_cw_loss(sess,target_model,orig_images,\
 				orig_labels,targeted=is_targeted,load_robust=load_robust)
 
-			# save local aes
-			np.save(local_info_file_prefix+'/local_aes.npy',local_aes)
-			# store local info of local aes and original seeds: used for scheduling seeds in batch attacks
-			np.savetxt(local_info_file_prefix+'/pgd_cnt_mat.txt',pgd_cnt_mat)
-			np.savetxt(local_info_file_prefix+'/orig_img_loss.txt',orig_img_loss)
-			np.savetxt(local_info_file_prefix+'/adv_img_loss.txt',adv_img_loss)
-			np.savetxt(local_info_file_prefix+'/ave_gap.txt',ave_gap)
+			if not args["force_tune_baseline"]:
+				# save local aes
+				np.save(local_info_file_prefix+'/local_aes.npy',local_aes)
+				# store local info of local aes and original seeds: used for scheduling seeds in batch attacks
+				np.savetxt(local_info_file_prefix+'/pgd_cnt_mat.txt',pgd_cnt_mat)
+				np.savetxt(local_info_file_prefix+'/orig_img_loss.txt',orig_img_loss)
+				np.savetxt(local_info_file_prefix+'/adv_img_loss.txt',adv_img_loss)
+				np.savetxt(local_info_file_prefix+'/ave_gap.txt',ave_gap)
 		else:
 			local_aes = np.load(local_info_file_prefix+'/local_aes.npy')
 			if is_targeted:
@@ -317,11 +324,14 @@ def main(args):
 			ind_all_trans_rate = 1 - ind_all_trans_rate
 		print('** (Independent Set) Transfer Rate: **' + str(ind_all_trans_rate))   
 		all_trans_rate_ls.append(ind_all_trans_rate)
-		
-		if all_trans_rate > use_loc_adv_thres:
-			print("Updated the starting points to local AEs....")
-			start_points[np.logical_not(attacked_flag)] = local_aes
-			use_loc_adv_flag = True
+		if args["test_trans_rate_only"]:
+			print("Program terminates after checking the transfer rate!")
+			sys.exit(0)
+		if not args["force_tune_baseline"]:
+			if all_trans_rate > use_loc_adv_thres:
+				print("Updated the starting points to local AEs....")
+				start_points[np.logical_not(attacked_flag)] = local_aes
+				use_loc_adv_flag = True
 
 	# initial fine-tuning set obtained from querying the target model
 	S = np.copy(start_points)
@@ -526,18 +536,19 @@ def main(args):
 						
 						# if trans rate is not high enough, still start from orig seed; start from loc adv only 
 						# when trans rate is high enough
-						if not use_loc_adv_flag:
-							if remain_trans_rate > use_loc_adv_thres: 
-								use_loc_adv_flag = True
+						if not args["force_tune_baseline"]:
+							if not use_loc_adv_flag:
+								if remain_trans_rate > use_loc_adv_thres: 
+									use_loc_adv_flag = True
+									print("Updated the starting points....")
+									start_points[np.logical_not(attacked_flag)] = remain_local_aes
+								# record the queries spent on checking newly generated loc advs
+								query_num_vec += 1
+							else:
 								print("Updated the starting points....")
 								start_points[np.logical_not(attacked_flag)] = remain_local_aes
-							# record the queries spent on checking newly generated loc advs
-							query_num_vec += 1
-						else:
-							print("Updated the starting points....")
-							start_points[np.logical_not(attacked_flag)] = remain_local_aes
-							# record the queries spent on checking newly generated loc advs
-							query_num_vec[np.logical_not(attacked_flag)] += 1
+								# record the queries spent on checking newly generated loc advs
+								query_num_vec[np.logical_not(attacked_flag)] += 1
 						remain_trans_rate_ls.append(remain_trans_rate)
 						all_trans_rate_ls.append(all_trans_rate)
 			np.set_printoptions(precision=4)
@@ -583,6 +594,8 @@ if __name__ == "__main__":
 	parser.add_argument("--local_path", default="local_info", help="the path to save the local attack results")
 	parser.add_argument("--loss_function", default="cw", choices=["xent", "cw"], help="loss function for attacking local models")
 	parser.add_argument("--load_local_AEs",action = "store_true",help = "load local adversarial examples")
+	parser.add_argument("--force_tune_baseline", action='store_true',help="local models are still tuned even running baseline attack")
+	parser.add_argument("--test_trans_rate_only", action='store_true',help="just check the transfer rate, terminate after that")
 
 	#parameters used for SDP based certifiable model (https://arxiv.org/pdf/1801.09344.pdf)
 	parser.add_argument("--num_classes", type=int, default=10, help="number of classes")
