@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "Transfer Rate of Attacking CIFAR10 Normal Target model with robust-2 local models" 
+echo "Transfer Rate of Attacking CIFAR10 normal target model with robust-2 local models" 
 python3 hybrid_attack.py --load_imgs -n 100 --with_local --test_trans_rate_only --attack_type targeted --model_type normal --local_model_names adv_densenet adv_resnet --seed 1234 --no_save_text --no_save_model
-echo "Transfer Rate of Attacking CIFAR10 Robust Target model with robust-2 local models"
+echo "Transfer Rate of Attacking CIFAR10 robust target model with robust-2 local models"
 python3 hybrid_attack.py --load_imgs -n 100 --with_local --test_trans_rate_only --attack_type untargeted --model_type robust --local_model_names adv_densenet adv_resnet --seed 1234 --no_save_text --no_save_model
 
 echo "Transfer Rate of Attacking CIFAR10 normal target with normal-3 local models" 
