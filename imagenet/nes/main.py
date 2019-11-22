@@ -14,7 +14,7 @@ from cleverhans.utils_tf import model_eval
 from attack_utils import nes_attack
 
 ###### put imagenet evaluation dataset path here ######
-INPUT_DIR = '/bigtemp/jc6ub/imagenet_tf/val/' # change here for your imagenet data path
+INPUT_DIR = '../imagenet_dataset/val/' # change here for your imagenet data path
 TOT_IMAGES = 200 # total image load from dataset
 IMAGE_SIZE = (224,224,3,)
 
