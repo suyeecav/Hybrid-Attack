@@ -7,7 +7,8 @@ set(0,'DefaultFigureVisible','on')
 % model_vec = {'madry_robust','mnist'};
 target_type_vec = {'targeted'};
 adv_type_vec = {'adv_no_tune','orig'};
-dataset_vec = {'cifar10','mnist'};
+% dataset_vec = {'cifar10','mnist'};
+dataset_vec = {'mnist'};
  
 % random_seed_vec = {'1234','2345','3456','4567','5678'};
 random_seed_vec = {'1234'};
@@ -18,14 +19,16 @@ class_num = 10;
 img_num = 100;
 
 query_sum_collect = zeros(class_num,length(adv_type_vec));
-attack_method_vec = {'autozoom','nes'};
+% attack_method_vec = {'autozoom','nes'};
+attack_method_vec = {'nes'};
 
 %main program
 mnist_cifar10_query = cell(1,2); % to plot the query distribution of mnist and cifar10, show query variance
 for sss = 1:length(dataset_vec)
     dataset = dataset_vec{sss};
     if strcmp(dataset,'mnist')
-        model_vec = {'madry_robust','mnist'};
+        % model_vec = {'madry_robust','mnist'};
+        model_vec = {'mnist'};
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     else

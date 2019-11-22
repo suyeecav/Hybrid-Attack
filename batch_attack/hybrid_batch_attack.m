@@ -8,14 +8,14 @@ adv_type_vec = {'adv_no_tune'};
 % random_seed_vec = {'1234','2345','3456','4567','5678'};
 random_seed_vec = {'1234'};
 % dataset_vec = {'mnist','cifar10'};
-dataset_vec = {'cifar10'};
+dataset_vec = {'mnist'};
 
 orig_class_vec = 0:9;
 class_num = 10;
 img_num = 1000;
 query_sum_collect = zeros(class_num,length(adv_type_vec));
 % attack_method_vec = {'autozoom','nes'};
-attack_method_vec = {'autozoom'};
+attack_method_vec = {'nes'};
 
 max_query_num = 4000;
 cost_base = 0;
@@ -23,7 +23,8 @@ cost_base = 0;
 for sss = 1:length(dataset_vec)
     dataset = dataset_vec{sss};
     if strcmp(dataset,'mnist')
-        model_vec = {'madry_robust','mnist'};
+        % model_vec = {'madry_robust','mnist'};
+        model_vec = {'mnist'};
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     else

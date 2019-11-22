@@ -12,9 +12,9 @@ class_num = 10;
 img_num = 1000;
 query_sum_collect = zeros(class_num,length(adv_type_vec));
 % attack_method_vec = {'nes','autozoom'};
-attack_method_vec = {'autozoom'}; 
+attack_method_vec = {'nes'}; 
 % dataset_vec = {'mnist','cifar10'};
-dataset_vec = {'cifar10'}; 
+dataset_vec = {'mnist'}; 
 
 max_query_num = 4000;
 cost_base = 0;
@@ -22,7 +22,8 @@ cost_base = 0;
 for sss = 1:length(dataset_vec)
     dataset = dataset_vec{sss};
     if strcmp(dataset,'mnist')
-        model_vec = {'madry_robust','mnist'};
+        % model_vec = {'madry_robust','mnist'};
+        model_vec = {'mnist'};
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     else
