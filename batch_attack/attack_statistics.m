@@ -239,27 +239,29 @@ end
 end
 
 % plot the query distribution
-figure;
-legend_info = {'MNIST','CIFAR10'};
-marker = {'-*','-s'};
-max_succ_num = 0;
-for haha = 1:length(mnist_cifar10_query)
-    if max_succ_num < length(mnist_cifar10_query{haha})
-        max_succ_num = length(mnist_cifar10_query{haha});
+if length(dataset_vec) > 1
+    figure;
+    legend_info = {'MNIST','CIFAR10'};
+    marker = {'-*','-s'};
+    max_succ_num = 0;
+    for haha = 1:length(mnist_cifar10_query)
+        if max_succ_num < length(mnist_cifar10_query{haha})
+            max_succ_num = length(mnist_cifar10_query{haha});
+        end
     end
-end
-for haha = 1:length(mnist_cifar10_query)
-    plot(1:length(mnist_cifar10_query{haha}),sort(mnist_cifar10_query{haha}), marker{haha},'MarkerIndices', [700 800],...
-        'MarkerSize',12, 'LineWidth',2);
-    ylim([1 4000]);
-    xlim([1 max_succ_num]);
-    xticks([1 100 200 300 max_succ_num]);
-    yticks([1 500 1000 1500 2000 2500 3000 3500 4000]);
+    for haha = 1:length(mnist_cifar10_query)
+        plot(1:length(mnist_cifar10_query{haha}),sort(mnist_cifar10_query{haha}), marker{haha},'MarkerIndices', [700 800],...
+            'MarkerSize',12, 'LineWidth',2);
+        ylim([1 4000]);
+        xlim([1 max_succ_num]);
+        xticks([1 100 200 300 max_succ_num]);
+        yticks([1 500 1000 1500 2000 2500 3000 3500 4000]);
 
-    xlabel('Images Sorted by Number of Queries','FontSize', 16);
-    ylabel('Number of Queries','FontSize', 16);
-    hold on;
+        xlabel('Images Sorted by Number of Queries','FontSize', 16);
+        ylabel('Number of Queries','FontSize', 16);
+        hold on;
+    end
+    legend(legend_info, 'FontSize', 18);
+    hold off;
 end
-legend(legend_info, 'FontSize', 18);
-hold off;
     
