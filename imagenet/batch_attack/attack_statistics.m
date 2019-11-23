@@ -176,7 +176,7 @@ for s = 1:length(attack_method_vec)
                 orig_ae_cost = sum(violation_check{1})/sum(succ_vec_check{1});
                 adv_ae_cost = sum(violation_check{2})/sum(succ_vec_check{2});
                 mean_cost_reduction = sum(orig_ae_cost-adv_ae_cost)/orig_ae_cost;
-                fprintf('violation percentage %f; mean cost reduction: %f \n',sum(violation_val)/length(violation_val),mean_cost_reduction);
+                fprintf('Fraction Better %f; Mean Cost Reduction: %f \n',1 - sum(violation_val)/length(violation_val),mean_cost_reduction);
                 mean_cost_reduction_vec(ii) = mean_cost_reduction;
                 violation_vec(ii) = sum(violation_val)/length(violation_val);
             end
@@ -186,8 +186,8 @@ for s = 1:length(attack_method_vec)
             mean(adv_succ_rate),std(adv_succ_rate),mean(adv_query_ae),std(adv_query_ae),mean(adv_query_seed),std(adv_query_seed),mean(adv_query_search),std(adv_query_search));            
             fprintf(' ## Orig ##  Success Rate: Mean (%.3f) Std (%.3f); Query/AE: Mean (%.3f) Std (%.3f); Query/Seed: Mean (%.3f) Std (%.3f); Query/Search: Mean (%.3f) Std (%.3f) \n',...
             mean(orig_succ_rate),std(orig_succ_rate),mean(orig_query_ae),std(orig_query_ae),mean(orig_query_seed),std(orig_query_seed),mean(orig_query_search),std(orig_query_search));
-            fprintf('Mean Cost Reduction:  Mean (%.3f) Std (%.3f), Violation: Mean (%.3f) Std (%.3f) \n',mean(mean_cost_reduction_vec),...
-                std(mean_cost_reduction_vec),mean(violation_vec), std(violation_vec));
+            fprintf('Mean Cost Reduction:  Mean (%.3f) Std (%.3f), Fraction Better: Mean (%.3f) Std (%.3f) \n',mean(mean_cost_reduction_vec),...
+                std(mean_cost_reduction_vec),mean(1-violation_vec), std(1-violation_vec));
         end
         
      % compare different local models
