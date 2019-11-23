@@ -4,10 +4,9 @@ warning off;
 
 set(0,'DefaultFigureVisible','on')
 
-% model_vec = {'madry_robust','mnist'};
 target_type_vec = {'targeted'};
-adv_type_vec = {'adv_no_tune','orig'};
-% dataset_vec = {'cifar10','mnist'};
+adv_type_vec = {'orig','adv_no_tune','adv_with_tune'};
+% dataset_vec = {'mnist','cifar10'};
 dataset_vec = {'mnist'};
  
 % random_seed_vec = {'1234','2345','3456','4567','5678'};
@@ -27,12 +26,13 @@ mnist_cifar10_query = cell(1,2); % to plot the query distribution of mnist and c
 for sss = 1:length(dataset_vec)
     dataset = dataset_vec{sss};
     if strcmp(dataset,'mnist')
-        % model_vec = {'madry_robust','mnist'};
+        % model_vec = {'mnist','madry_robust'};
         model_vec = {'mnist'};
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     else
-        model_vec = {'madry_robust','densenet'};
+        model_vec = {'densenet','madry_robust'};
+        % model_vec = {'densenet'};
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     end
@@ -61,20 +61,37 @@ for s = 1:length(attack_method_vec)
         for kk = 1:length(local_type_vec)
             fprintf('******************************************************\n')
             local_type = local_type_vec{kk};
+            local_type_store = local_type;
+            % we did not do tunning for robust local models
+            if strcmp(local_type,'adv_densenet_adv_resnet') && strcmp(dataset,'cifar10')
+                adv_type_vec = {'orig','adv_no_tune'};
+            elseif strcmp(dataset,'cifar10')
+                adv_type_vec = {'orig','adv_no_tune','adv_with_tune'};
+            end
             % store the performance in each independent run
-            trans_rate_vec = zeros(1,length(random_seed_vec)); 
+            trans_rate_vec = zeros(1,length(random_seed_vec));
+            
             orig_succ_rate = zeros(1,length(random_seed_vec)); 
             adv_succ_rate = zeros(1,length(random_seed_vec)); 
+            adv_tune_succ_rate = zeros(1,length(random_seed_vec)); 
+            
             orig_query_ae = zeros(1,length(random_seed_vec)); 
-            adv_query_ae = zeros(1,length(random_seed_vec)); 
+            adv_query_ae = zeros(1,length(random_seed_vec));
+            adv_tune_query_ae = zeros(1,length(random_seed_vec));
+            
             orig_query_seed = zeros(1,length(random_seed_vec)); 
             adv_query_seed = zeros(1,length(random_seed_vec)); 
+            adv_tune_query_seed = zeros(1,length(random_seed_vec));
+            
             orig_query_search = zeros(1,length(random_seed_vec)); 
             adv_query_search = zeros(1,length(random_seed_vec)); 
+            adv_tune_query_search = zeros(1,length(random_seed_vec)); 
+            
             mean_cost_reduction_vec = zeros(1,length(random_seed_vec)); 
             violation_vec = zeros(1,length(random_seed_vec)); 
             
             for ii = 1:length(random_seed_vec)
+                % local_type = local_type_store;
                 rand_seed = random_seed_vec{ii};
                 violation_check = cell(1,2);
                 succ_vec_check = cell(1,2);
@@ -82,7 +99,7 @@ for s = 1:length(attack_method_vec)
                 if strcmp(dataset,'mnist')
                     local_file_path_head = [local_info_prefix '/' model '/' target_type '/' rand_seed '/'];
                 else
-                    local_file_path_head = [local_info_prefix '/' model '/' target_type '/' local_type '/' rand_seed '/'];
+                    local_file_path_head = [local_info_prefix '/' model '/' target_type '/' local_type_store '/' rand_seed '/'];
                 end
 
                 adv_loss_name = ['adv_img_loss.txt'];
@@ -96,7 +113,12 @@ for s = 1:length(attack_method_vec)
                 for k = 1:length(adv_type_vec)
                     adv_type = adv_type_vec{k};
                     % load query number and success rate vec
-                    fprintf('-------------Printing %s %s %s %s %s %s Round %d:-----------------\n', dataset,attack_method,target_type,model,local_type,adv_type,ii);
+                    if strcmp(adv_type,'orig') && strcmp(dataset,'cifar10')
+                        local_type = 'no_local_model';
+                    else
+                        local_type = local_type_store;
+                    end
+                    fprintf('-------------Printing %s %s %s %s %s %s Round %d:-----------------\n', dataset,attack_method,target_type,model,local_type_store,adv_type,ii);
                     if strcmp(dataset,'mnist')
                         file_path_head1 = [bbox_result_prefix '/' attack_method '/' model '/' target_type '/' rand_seed '/'];
                     else
@@ -176,6 +198,11 @@ for s = 1:length(attack_method_vec)
                         adv_query_seed(ii) = query_seed;
                         adv_query_ae(ii) = query_ae;
                         adv_query_search(ii) = query_search;
+                    elseif strcmp(adv_type,'adv_with_tune')
+                        adv_tune_succ_rate(ii) = succ_rate;
+                        adv_tune_query_seed(ii) = query_seed;
+                        adv_tune_query_ae(ii) = query_ae;
+                        adv_tune_query_search(ii) = query_search;
                     end
                     non_trans_idx = ~direct_transfer_idx;
                     succ_non_trans_query_num_vec = query_num_vec(logical(succ_rate_vec) & non_trans_idx);
@@ -191,18 +218,20 @@ for s = 1:length(attack_method_vec)
                 orig_ae_cost = sum(violation_check{1})/sum(succ_vec_check{1});
                 adv_ae_cost = sum(violation_check{2})/sum(succ_vec_check{2});
                 mean_cost_reduction = sum(orig_ae_cost-adv_ae_cost)/orig_ae_cost;
-                fprintf('violation percentage %f; mean cost reduction: %f \n',sum(violation_val)/length(violation_val),mean_cost_reduction);
+                fprintf('Fraction Better %f; Mean Cost Reduction: %f \n',1-sum(violation_val)/length(violation_val),mean_cost_reduction);
                 mean_cost_reduction_vec(ii) = mean_cost_reduction;
                 violation_vec(ii) = sum(violation_val)/length(violation_val);
             end
             % now print the info of 5 independent runs
             fprintf('Direct transfer rate: Mean (%3f) Std (%3f) \n',mean(trans_rate_vec),std(trans_rate_vec));
-            fprintf(' ## Adv ##  Success Rate: Mean (%.3f) Std (%.3f); Query/AE: Mean (%.3f) Std (%.3f); Query/Seed: Mean (%.3f) Std (%.3f); Query/Search: Mean (%.3f) Std (%.3f) \n',...
-            mean(adv_succ_rate),std(adv_succ_rate),mean(adv_query_ae),std(adv_query_ae),mean(adv_query_seed),std(adv_query_seed),mean(adv_query_search),std(adv_query_search));            
-            fprintf(' ## Orig ##  Success Rate: Mean (%.3f) Std (%.3f); Query/AE: Mean (%.3f) Std (%.3f); Query/Seed: Mean (%.3f) Std (%.3f); Query/Search: Mean (%.3f) Std (%.3f) \n',...
-            mean(orig_succ_rate),std(orig_succ_rate),mean(orig_query_ae),std(orig_query_ae),mean(orig_query_seed),std(orig_query_seed),mean(orig_query_search),std(orig_query_search));
-            fprintf('Mean Cost Reduction:  Mean (%.3f) Std (%.3f), Violation: Mean (%.3f) Std (%.3f) \n',mean(mean_cost_reduction_vec),...
-                std(mean_cost_reduction_vec),mean(violation_vec), std(violation_vec));
+            fprintf(' ## Orig ##  Success Rate: Mean (%.3f) Std (%.3f); Query/Seed: Mean (%.3f) Std (%.3f); Query/AE: Mean (%.3f) Std (%.3f); Query/Search: Mean (%.3f) Std (%.3f) \n',...
+            mean(orig_succ_rate),std(orig_succ_rate),mean(orig_query_seed),std(orig_query_seed),mean(orig_query_ae),std(orig_query_ae),mean(orig_query_search),std(orig_query_search));
+            fprintf(' ## Adv No Tune##  Success Rate: Mean (%.3f) Std (%.3f); Query/Seed: Mean (%.3f) Std (%.3f); Query/AE: Mean (%.3f) Std (%.3f); Query/Search: Mean (%.3f) Std (%.3f) \n',...
+            mean(adv_succ_rate),std(adv_succ_rate),mean(adv_query_seed),std(adv_query_seed),mean(adv_query_ae),std(adv_query_ae),mean(adv_query_search),std(adv_query_search));            
+            fprintf(' ## Adv With Tune##  Success Rate: Mean (%.3f) Std (%.3f); Query/Seed: Mean (%.3f) Std (%.3f); Query/AE: Mean (%.3f) Std (%.3f);Query/Search: Mean (%.3f) Std (%.3f) \n',...
+            mean(adv_tune_succ_rate),std(adv_tune_succ_rate),mean(adv_tune_query_seed),std(adv_tune_query_seed),mean(adv_tune_query_ae),std(adv_tune_query_ae),mean(adv_tune_query_search),std(adv_tune_query_search));                
+            fprintf('Mean Cost Reduction:  Mean (%.3f) Std (%.3f), Fraction Better: Mean (%.3f) Std (%.3f) \n',mean(mean_cost_reduction_vec),...
+                std(mean_cost_reduction_vec),mean(1-violation_vec), std(1-violation_vec));
         end
         
      % compare different local models

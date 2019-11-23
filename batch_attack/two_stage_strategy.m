@@ -18,6 +18,7 @@ img_num = 1000;
 query_sum_collect = zeros(class_num,length(adv_type_vec));
 % attack_method_vec = {'autozoom','nes'};
 attack_method_vec = {'nes'};
+
 metric = 'PGD-Step';
 % dataset_vec = {'cifar10', 'mnist'};
 dataset_vec = {'mnist'};
@@ -29,13 +30,13 @@ cost_base = 0;
 for sss = 1:length(dataset_vec)
     dataset = dataset_vec{sss};
     if strcmp(dataset,'mnist')
-        % model_vec = {'madry_robust','mnist'};
+        % model_vec = {'mnist','madry_robust'};
         model_vec = {'mnist'};
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     else
-        % model_vec = {'madry_robust','densenet'};
-        model_vec = {'madry_robust'};
+        model_vec = {'madry_robust','densenet'};
+        % model_vec = {'madry_robust'};
         local_info_prefix = ['../' dataset '/local_info'];
         bbox_result_prefix =  ['../' dataset '/Results'];
     end
