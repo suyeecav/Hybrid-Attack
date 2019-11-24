@@ -11,7 +11,7 @@ end
     
 for i = 1:length(greedy_adv_num_cell)
     adv_num = greedy_adv_num_cell{i};
-    plot(0:query_budget,adv_num(1:query_budget+1),marker_info{i},'MarkerSize',12,'MarkerIndices', [marker_index],...
+    loglog(0:query_budget,adv_num(1:query_budget+1),marker_info{i},'MarkerSize',12,'MarkerIndices', [marker_index],...
     'LineWidth',2);
     xlim([0  query_budget]);
     ylim([0 Inf]);
