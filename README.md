@@ -17,3 +17,13 @@ To reproduce our results, please follow the steps below:
 # Incorporate New Attack into our Framework
 
 To incorporate new black-box attack into our framework, please see our tutorial folder for more instruction.
+
+# Citation
+```
+@inproceedings{suya2020hybrid,
+  title={Hybrid {B}atch {A}ttacks: Finding black-box adversarial examples with limited queries},
+  author={Suya, Fnu and Chi, Jianfeng and Evans, David and Tian, Yuan},
+  booktitle={USENIX Security Symposium},
+  year={2020}
+}
+```
