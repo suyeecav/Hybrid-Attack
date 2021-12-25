@@ -19,5 +19,5 @@ If your attack is written in PyTorch, please refer to the demo of [simBA.py](htt
 All attacks take ```attack_seed```, ```initial_img``` and ```target_class``` as input parameters in addition to other attack-specfic parameters. As an illustration, in order to run the ```simple black-box pixel-attack```, execute the following command:
 
 ```
-python test_h1_pytorch --black-attack simBA
+python test_h1_pytorch.py --black-attack simBA
 ```
