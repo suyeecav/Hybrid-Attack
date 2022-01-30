@@ -84,8 +84,8 @@ class LinfPGDAttack(object):
 			# update
 			eta = self.a * grad.data.sign()
 			X_pgd = Variable(X_pgd.data + eta, requires_grad=True)
-			eta = torch.clamp(X_pgd.data - X.data, -self.epsilon, self.epsilon) # eta [-epsilon, epsilon] range
-			X_pgd = Variable(X.data + eta, requires_grad=True)
+			eta = torch.clamp(X_pgd.data - X_nat.data, -self.epsilon, self.epsilon) # eta [-epsilon, epsilon] range
+			X_pgd = Variable(X_nat.data + eta, requires_grad=True)
 			X_pgd = Variable(torch.clamp(X_pgd, 0, 1.0), requires_grad=True) # [0, 1] pixel range
 			# logging
 			print('loss: ', np.mean(loss_vals))
